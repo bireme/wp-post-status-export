@@ -15,3 +15,27 @@ You can also use the following parameters and filters:
 ```
 http://<domain>/?feed=stats&post_type=post&format=xml
 ```
+
+## Output example
+#### XML
+```
+<stats>
+    <total>111</total>
+    <status>
+        <field name="publish">100</field>
+        <field name="draft">10</field>
+        <field name="pending">1</field>
+    </status>
+</stats>
+```
+#### JSON
+```
+{
+    total: 111,
+    status: {
+        publish: "100",
+        draft: "10",
+        pending: "1",
+    },
+}
+```
