@@ -1,7 +1,7 @@
 <?php
 
 if ( !function_exists( 'parse_stats' ) ) {
-	/**
+    /**
      * Parse XML to Array
      *
      * @param string $url
