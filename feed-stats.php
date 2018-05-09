@@ -1,6 +1,6 @@
 <?php
 /**
- * Feed generator template.
+ * Output generator template.
  */
 
 $post_type = ( $_GET['post_type'] ) ? $_GET['post_type'] : 'post';
