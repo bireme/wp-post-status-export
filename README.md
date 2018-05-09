@@ -1,4 +1,4 @@
-# WP Posts Status Export
+# WP Post Status Export
 
 ## About
 This plugin show up the WP post status in output format (XML and JSON).
