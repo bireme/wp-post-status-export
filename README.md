@@ -9,11 +9,12 @@ Activate the plugin and access `http://<domain>/?feed=stats` to show the output 
 You can also use the following parameters and filters:
 
 * `post_type`- Filter by post type (default: post)
+* `tax`- Filter by taxonomy
 * `format`-  Output format. Possible values are __xml__ and __json__ (default: xml)
 
 ## Usage example
 ```
-http://<domain>/?feed=stats&post_type=post&format=xml
+http://<domain>/?feed=stats&post_type=post&tax=teleconsultor&format=xml
 ```
 
 ## Output example
@@ -24,8 +25,28 @@ http://<domain>/?feed=stats&post_type=post&format=xml
     <status>
         <field name="publish">100</field>
         <field name="draft">10</field>
-        <field name="pending">1</field>
+        <field name="pending">5</field>
     </status>
+    <taxonomy>
+        <item>
+            <name><![CDATA[ITEM 1]]></name>
+            <total>30</total>
+            <status>
+                <field name="publish">29</field>
+                <field name="pending">2</field>
+                <field name="draft">1</field>
+            </status>
+        </item>
+        <item>
+            <name><![CDATA[ITEM 2]]></name>
+            <total>60</total>
+            <status>
+                <field name="publish">57</field>
+                <field name="draft">3</field>
+                <field name="pending">1</field>
+            </status>
+        </item>
+    </taxonomy>
 </stats>
 ```
 #### JSON
@@ -35,7 +56,27 @@ http://<domain>/?feed=stats&post_type=post&format=xml
     status: {
         publish: "100",
         draft: "10",
-        pending: "1",
+        pending: "5",
     },
+    taxonomy: [
+        {
+            name: "ITEM 1",
+            total: 30,
+            status: {
+                publish: 29,
+                pending: 2,
+                draft: 1,
+            },
+        },
+        {
+            name: "ITEM 2",
+            total: 60,
+            status: {
+                publish: 57,
+                draft: 3,
+                pending: 1,
+            },
+        },
+    ],
 }
 ```
