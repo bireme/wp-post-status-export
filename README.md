@@ -10,12 +10,20 @@ You can also use the following parameters and filters:
 
 * `post_type`- Filter by post type (default: post)
 * `tax`- Filter by taxonomy slug
-* `format`-  Output format. Possible values are __xml__ and __json__ (default: xml)
+* `poll`- Filter by poll ID
+* `initial_date`- Filter by publish date (initial range)
+* `end_date`- Filter by publish date (end range)
+* `count`- Display content limit (default: -1 = ALL)
+* `format`- Output format. Possible values are __xml__ and __json__ (default: xml)
 
 ## Usage example
 ```
 http://<domain>/?feed=stats&post_type=post&tax=teleconsultor&format=xml
 ```
+
+## NOTES
+* The __initial_date__ and __end_date__ parameters are dependent
+* The __initial_date__ and __end_date__ parameters only work if __poll__ parameter is not set
 
 ## Output example
 #### XML
