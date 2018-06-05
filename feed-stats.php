@@ -3,10 +3,11 @@
  * Output generator template.
  */
 
-$post_type = ( $_GET['post_type'] ) ? $_GET['post_type'] : 'post';
-$format = ( $_GET['format'] ) ? $_GET['format'] : 'xml';
+$post_type     = ( $_GET['post_type'] ) ? $_GET['post_type'] : 'post';
+$format        = ( $_GET['format'] ) ? $_GET['format'] : 'xml';
+$count         = ( $_GET['count'] ) ? $_GET['count'] : -1;
 
-$count_posts = wp_count_posts($post_type);
+$count_posts   = wp_count_posts($post_type);
 
 $publish_posts = $count_posts->publish;
 $draft_posts   = $count_posts->draft;
@@ -18,15 +19,121 @@ $total = $publish_posts + $draft_posts + $pending_posts + $trash_posts;
 $stats = array(
     'total'  => $total,
     'status' => array(
-        'publish' => $publish_posts,
-        'draft'   => $draft_posts,
-        'pending' => $pending_posts,
-        'trash'   => $trash_posts
+        'publish' => (int) $publish_posts,
+        'draft'   => (int) $draft_posts,
+        'pending' => (int) $pending_posts,
+        'trash'   => (int) $trash_posts
     )
 );
 
+$args = array(
+    'posts_per_page' => $count,
+    'post_type'      => $post_type,
+    'post_status'    => array( 'publish', 'pending', 'draft', 'trash' ),
+);
+
+// initial_date and end_date parameters
+if ( $_GET['initial_date'] && $_GET['end_date'] ) {
+    $initial_date = getdate(strtotime($_GET['initial_date']));
+    $end_date     = getdate(strtotime($_GET['end_date']));
+
+    $args['date_query'] = array(
+        array(
+            'after' => array(
+                'year'  => $initial_date['year'],
+                'month' => $initial_date['mon'],
+                'day'   => $initial_date['mday'],
+            ),
+            'before' => array(
+                'year'  => $end_date['year'],
+                'month' => $end_date['mon'],
+                'day'   => $end_date['mday'],
+            ),
+            'inclusive' => true,
+        ),
+    );
+
+    $posts = get_posts($args);
+    $post_status = wp_list_pluck( $posts, 'post_status');
+    $posts_per_status = array_count_values($post_status);
+    $total = count($posts);
+
+    $publish_posts = ( $posts_per_status['publish'] ) ? $posts_per_status['publish'] : 0;
+    $draft_posts   = ( $posts_per_status['draft'] ) ? $posts_per_status['draft'] : 0;
+    $pending_posts = ( $posts_per_status['pending'] ) ? $posts_per_status['pending'] : 0;
+    $trash_posts   = ( $posts_per_status['trash'] ) ? $posts_per_status['trash'] : 0;
+
+    $stats = array(
+        'total'  => $total,
+        'status' => array(
+            'publish' => $publish_posts,
+            'draft'   => $draft_posts,
+            'pending' => $pending_posts,
+            'trash'   => $trash_posts
+        )
+    );
+}
+
+// poll parameter
+if ( $_GET['poll'] ) {
+    $poll = $_GET['poll'];
+    $args['meta_key'] = 'yop_poll_'.$poll ;
+
+    $data    = get_poll($poll);
+    $votes   = yop_poll_ret_poll_by_votes_desc(array($poll));
+
+    $answers = $poll_answers = get_poll_answers($poll);
+    $answers = array_map("get_object_vars", $answers);
+    $answers = array_map(function ($arr) {
+        $keys = array( 'answer' => '', 'votes' => '' );
+        return array_intersect_key($arr, $keys);
+    }, $answers);
+    $answers = str_replace('"answer":', '"name":', json_encode($answers));
+    $answers = json_decode($answers, true);
+
+    $stats['poll'] = array(
+        'name'    => $data[0]->question,
+        'votes'   => $votes[0]['poll_total_votes'],
+        'answers' => $answers
+    );
+
+    $stats['poll']['sofs'] = array();
+
+    $posts = get_posts($args);
+
+    foreach ($posts as $post) {
+        $answers = array();
+        $meta = get_post_meta($post->ID, 'yop_poll_'.$poll);
+
+        foreach ($poll_answers as $answer) {
+            $key = 'answer_'.$answer->ID;
+
+            if ( array_key_exists($key, $meta[0]) ) {
+                $answers[] = array(
+                    'name'  => $answer->answer,
+                    'votes' => $meta[0][$key]['votes']
+                );
+            }
+        }
+
+        $sof = array(
+            'title'   => $post->post_title,
+            'votes'   => $meta[0]['votes'],
+            'answers' => $answers
+        );
+
+        $stats['poll']['sofs'][] = $sof;
+    }
+
+    usort($stats['poll']['sofs'], "intcmp");
+    $stats['poll']['sofs'] = array_reverse($stats['poll']['sofs']);
+}
+
+// tax parameter
 if ( $_GET['tax'] ) {
-    $args = array(
+    $count = ( $_GET['count'] ) ? $_GET['count'] : 0;
+
+    $tax_args = array(
         'type'         => 'post',
         'child_of'     => 0,
         'parent'       => '',
@@ -36,12 +143,12 @@ if ( $_GET['tax'] ) {
         'hierarchical' => 1,
         'exclude'      => '',
         'include'      => '',
-        'number'       => '',
+        'number'       => $count,
         'taxonomy'     => $_GET['tax'],
         'pad_counts'   => false 
-    ); 
+    );
     
-    $categories = get_categories( $args );
+    $categories = get_categories( $tax_args );
 
     if ( $categories['errors'] ) {
         die(utf8_decode($categories['errors']['invalid_taxonomy'][0]));
@@ -50,11 +157,8 @@ if ( $_GET['tax'] ) {
     $stats['taxonomy'] = array();
 
     foreach ( $categories as $cat ) {
-        $args = array();
-        $args['posts_per_page'] = -1;
-        $args['post_type']      = $post_type;
-        $args['post_status']    = array( 'publish', 'pending', 'draft', 'trash' );
-        $args['tax_query']      = array(
+        $args['posts_per_page'] = -1 ;
+        $args['tax_query'] = array(
             array(
                 'taxonomy' => $_GET['tax'],
                 'field' => 'term_id',
@@ -65,19 +169,26 @@ if ( $_GET['tax'] ) {
         $posts = get_posts($args);
         $post_status = wp_list_pluck( $posts, 'post_status');
         $tax_stats = array_count_values($post_status);
+        $tax_total = array_sum($tax_stats);
 
         arsort($tax_stats);
 
         $taxonomy = array(
             'name'   => $cat->name,
-            'total'  => array_sum($tax_stats),
+            'total'  => $tax_total,
             'status' => $tax_stats
         );
 
-        $stats['taxonomy'][] = $taxonomy;
+        if ( $tax_total > 0  ) {
+            $stats['taxonomy'][] = $taxonomy;
+        }
     }
+
+    usort($stats['taxonomy'], "intcmp");
+    $stats['taxonomy'] = array_reverse($stats['taxonomy']);
 }
 
+// output format
 if ( 'json' == $format ) {
     die(json_encode($stats));
 } else {
@@ -93,21 +204,9 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>';
         <?php endforeach; ?>
     </status>
     <?php if ( $stats['taxonomy'] ) : ?>
-    <taxonomy>
-        <?php foreach ($stats['taxonomy'] as $tax) : ?>
-        <item>
-            <name><![CDATA[<?php echo $tax['name']; ?>]]></name>
-            <total><?php echo $tax['total']; ?></total>
-            <?php if ( $tax['status'] ) : ?>
-            <status>
-                <?php foreach ($tax['status'] as $k => $v) : ?>
-                <field name="<?php echo $k; ?>"><?php echo $v; ?></field>
-                <?php endforeach; ?>
-            </status>
-            <?php endif; ?>
-        </item>
-        <?php endforeach; ?>
-    </taxonomy>
+        <?php print_taxonomy_stats($stats); ?>
+    <?php elseif ( $stats['poll'] ) : ?>
+        <?php print_poll_stats($stats); ?>
     <?php endif; ?>
 </stats>
 
