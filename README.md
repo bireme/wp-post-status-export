@@ -9,7 +9,7 @@ Activate the plugin and access `http://<domain>/?feed=stats` to show the output 
 You can also use the following parameters and filters:
 
 * `post_type`- Filter by post type (default: post)
-* `tax`- Filter by taxonomy
+* `tax`- Filter by taxonomy slug
 * `format`-  Output format. Possible values are __xml__ and __json__ (default: xml)
 
 ## Usage example
