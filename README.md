@@ -11,8 +11,8 @@ You can also use the following parameters and filters:
 * `post_type`- Filter by post type (default: post)
 * `tax`- Filter by taxonomy slug
 * `poll`- Filter by poll ID
-* `initial_date`- Filter by publish date (initial range)
-* `end_date`- Filter by publish date (end range)
+* `initial_date`- Filter by publish date (format: YYYYMMDD or YYYY-MM-DD)
+* `end_date`- Filter by publish date (format: YYYYMMDD or YYYY-MM-DD)
 * `count`- Display content limit (default: -1 = ALL)
 * `format`- Output format. Possible values are __xml__ and __json__ (default: xml)
 
