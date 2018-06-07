@@ -162,6 +162,11 @@ if ( $_GET['tax'] ) {
     $taxonomies = array();
 
     foreach ( $categories as $cat ) {
+        $decs = array(
+            'tree_id' => '',
+            'decs_id' => ''
+        );
+
         $args['posts_per_page'] = -1 ;
         $args['tax_query'] = array(
             array(
@@ -172,16 +177,32 @@ if ( $_GET['tax'] ) {
         );
 
         $posts = get_posts($args);
+        $meta  = get_post_meta($posts[0]->ID, 'wpdecs_terms');
+
+        if ( 'decs' == $_GET['tax'] ) {
+            foreach ($meta[0] as $key => $value) {
+                $handle = explode('|', $key);
+
+                if ($handle[1] == $cat->name) {
+                    $decs['tree_id'] = $handle[0];
+                    $decs['decs_id'] = $value['mfn'];
+                    break;
+                }
+            }
+        }
+
         $post_status = wp_list_pluck( $posts, 'post_status');
-        $tax_stats = array_count_values($post_status);
-        $tax_total = array_sum($tax_stats);
+        $tax_stats   = array_count_values($post_status);
+        $tax_total   = array_sum($tax_stats);
 
         arsort($tax_stats);
 
         $taxonomy = array(
-            'name'   => $cat->name,
-            'total'  => $tax_total,
-            'status' => $tax_stats
+            'name'    => $cat->name,
+            'tree_id' => $decs['tree_id'],
+            'decs_id' => $decs['decs_id'],
+            'total'   => $tax_total,
+            'status'  => $tax_stats
         );
 
         if ( $tax_total > 0  ) {
@@ -201,10 +222,13 @@ if ( $_GET['tax'] ) {
 
 // output format
 if ( 'json' == $format ) {
-    die(json_encode($stats));
+    header('Cache-Control: no-cache, must-revalidate');
+    header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+    header('Content-type: application/json');
+    print json_encode($stats);
 } else {
-header('Content-Type: ' . feed_content_type('rss-http') . '; charset=' . get_option('blog_charset'), true);
-echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>';
+    header('Content-Type: ' . feed_content_type('rss-http') . '; charset=' . get_option('blog_charset'), true);
+    echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>';
 ?>
 
 <stats>
@@ -215,7 +239,7 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>';
         <?php endforeach; ?>
     </status>
     <?php if ( $stats['taxonomy'] ) : ?>
-        <?php print_taxonomy_stats($stats); ?>
+        <?php print_taxonomy_stats($stats, $_GET['tax']); ?>
     <?php elseif ( $stats['poll'] ) : ?>
         <?php print_poll_stats($stats); ?>
     <?php endif; ?>

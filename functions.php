@@ -84,14 +84,19 @@ if ( !function_exists( 'print_taxonomy_stats' ) ) {
      * Print taxomony stats
      *
      * @param array $stats
+     * @param string $taxonomy
      * @return XML
      */
-    function print_taxonomy_stats($stats=array()){
+    function print_taxonomy_stats($stats=array(), $taxonomy){
         if ( $stats && is_array($stats) ) : ?>
         <taxonomy>
             <?php foreach ($stats['taxonomy'] as $tax) : ?>
             <item>
                 <name><![CDATA[<?php echo $tax['name']; ?>]]></name>
+                <?php if ( 'decs' == $taxonomy ) : ?>
+                <tree_id><![CDATA[<?php echo $tax['tree_id']; ?>]]></tree_id>
+                <decs_id><?php echo $tax['decs_id']; ?></decs_id>
+                <?php endif; ?>
                 <total><?php echo $tax['total']; ?></total>
                 <?php if ( $tax['status'] ) : ?>
                 <status>
