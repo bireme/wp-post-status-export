@@ -119,6 +119,7 @@ if ( $_GET['poll'] ) {
 
         $sof = array(
             'title'   => $post->post_title,
+            'link'    => get_permalink(),
             'votes'   => $meta[0]['votes'],
             'answers' => $answers
         );

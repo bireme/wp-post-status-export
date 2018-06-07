@@ -94,7 +94,7 @@ if ( !function_exists( 'print_taxonomy_stats' ) ) {
             <item>
                 <name><![CDATA[<?php echo $tax['name']; ?>]]></name>
                 <?php if ( 'decs' == $taxonomy ) : ?>
-                <tree_id><![CDATA[<?php echo $tax['tree_id']; ?>]]></tree_id>
+                <tree_id><?php echo $tax['tree_id']; ?></tree_id>
                 <decs_id><?php echo $tax['decs_id']; ?></decs_id>
                 <?php endif; ?>
                 <total><?php echo $tax['total']; ?></total>
@@ -139,6 +139,7 @@ if ( !function_exists( 'print_poll_stats' ) ) {
                 <?php foreach ( $stats['poll']['sofs'] as $sof ) : ?>
                 <sof>
                     <title><![CDATA[<?php echo $sof['title']; ?>]]></title>
+                    <link><?php echo $sof['link']; ?></link>
                     <votes><?php echo $sof['votes']; ?></votes>
                     <?php if ( $sof['answers'] ) : ?>
                     <answers>
