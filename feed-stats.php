@@ -27,7 +27,6 @@ $stats = array(
 );
 
 $args = array(
-    'posts_per_page' => $count,
     'post_type'      => $post_type,
     'post_status'    => array( 'publish', 'pending', 'draft', 'trash' ),
 );
@@ -37,6 +36,7 @@ if ( $_GET['initial_date'] && $_GET['end_date'] ) {
     $initial_date = getdate(strtotime($_GET['initial_date']));
     $end_date     = getdate(strtotime($_GET['end_date']));
 
+    $args['posts_per_page'] = $count ;
     $args['date_query'] = array(
         array(
             'after' => array(
@@ -77,6 +77,7 @@ if ( $_GET['initial_date'] && $_GET['end_date'] ) {
 // poll parameter
 if ( $_GET['poll'] ) {
     $poll = $_GET['poll'];
+    $args['posts_per_page'] = -1 ;
     $args['meta_key'] = 'yop_poll_'.$poll ;
 
     $data    = get_poll($poll);
@@ -97,7 +98,7 @@ if ( $_GET['poll'] ) {
         'answers' => $answers
     );
 
-    $stats['poll']['sofs'] = array();
+    $sofs = array();
 
     $posts = get_posts($args);
 
@@ -122,17 +123,21 @@ if ( $_GET['poll'] ) {
             'answers' => $answers
         );
 
-        $stats['poll']['sofs'][] = $sof;
+        $sofs[] = $sof;
     }
 
-    usort($stats['poll']['sofs'], "intcmp");
-    $stats['poll']['sofs'] = array_reverse($stats['poll']['sofs']);
+    usort($sofs, "intcmp");
+    $sofs = array_reverse($sofs);
+
+    if ( $count > 0 ) {
+        $stats['poll']['sofs'] = array_slice($sofs, 0, $count);
+    } else {
+        $stats['poll']['sofs'] = $sofs;
+    }
 }
 
 // tax parameter
 if ( $_GET['tax'] ) {
-    $count = ( $_GET['count'] ) ? $_GET['count'] : 0;
-
     $tax_args = array(
         'type'         => 'post',
         'child_of'     => 0,
@@ -143,7 +148,7 @@ if ( $_GET['tax'] ) {
         'hierarchical' => 1,
         'exclude'      => '',
         'include'      => '',
-        'number'       => $count,
+        'number'       => '',
         'taxonomy'     => $_GET['tax'],
         'pad_counts'   => false 
     );
@@ -154,7 +159,7 @@ if ( $_GET['tax'] ) {
         die(utf8_decode($categories['errors']['invalid_taxonomy'][0]));
     }
 
-    $stats['taxonomy'] = array();
+    $taxonomies = array();
 
     foreach ( $categories as $cat ) {
         $args['posts_per_page'] = -1 ;
@@ -180,12 +185,18 @@ if ( $_GET['tax'] ) {
         );
 
         if ( $tax_total > 0  ) {
-            $stats['taxonomy'][] = $taxonomy;
+            $taxonomies[] = $taxonomy;
         }
     }
 
-    usort($stats['taxonomy'], "intcmp");
-    $stats['taxonomy'] = array_reverse($stats['taxonomy']);
+    usort($taxonomies, "intcmp");
+    $taxonomies = array_reverse($taxonomies);
+
+    if ( $count > 0 ) {
+        $stats['taxonomy'] = array_slice($taxonomies, 0, $count);
+    } else {
+        $stats['taxonomy'] = $taxonomies;
+    }
 }
 
 // output format
