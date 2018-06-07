@@ -24,7 +24,7 @@ http://<domain>/?feed=stats&post_type=post&tax=teleconsultor&format=xml
 ## NOTES
 * The __initial_date__ and __end_date__ parameters are dependent
 * The __initial_date__ and __end_date__ parameters only work if __poll__ parameter is not set
-* The __poll__ parameter only works if [YOP Poll](https://wordpress.org/plugins/yop-poll/) is activated
+* The __poll__ parameter only works if [YOP Poll plugin](https://wordpress.org/plugins/yop-poll/) is activated
 
 ## Output example
 #### XML
