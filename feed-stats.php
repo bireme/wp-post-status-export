@@ -163,10 +163,7 @@ if ( $_GET['tax'] ) {
     $taxonomies = array();
 
     foreach ( $categories as $cat ) {
-        $decs = array(
-            'tree_id' => '',
-            'decs_id' => ''
-        );
+        $decs = array();
 
         $args['posts_per_page'] = -1 ;
         $args['tax_query'] = array(
@@ -198,13 +195,21 @@ if ( $_GET['tax'] ) {
 
         arsort($tax_stats);
 
-        $taxonomy = array(
-            'name'    => $cat->name,
-            'tree_id' => $decs['tree_id'],
-            'decs_id' => $decs['decs_id'],
-            'total'   => $tax_total,
-            'status'  => $tax_stats
-        );
+        if ( $decs ) {
+            $taxonomy = array(
+                'name'    => $cat->name,
+                'tree_id' => $decs['tree_id'],
+                'decs_id' => $decs['decs_id'],
+                'total'   => $tax_total,
+                'status'  => $tax_stats
+            );
+        } else {
+            $taxonomy = array(
+                'name'    => $cat->name,
+                'total'   => $tax_total,
+                'status'  => $tax_stats
+            );
+        }
 
         if ( $tax_total > 0  ) {
             $taxonomies[] = $taxonomy;
