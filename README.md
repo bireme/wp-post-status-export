@@ -18,7 +18,7 @@ You can also use the following parameters and filters:
 
 ## Usage example
 ```
-http://<domain>/?feed=stats&post_type=post&tax=teleconsultor&format=xml
+http://<domain>/?feed=stats&post_type=post&tax=<taxonomy>&format=xml
 ```
 
 ## NOTES
