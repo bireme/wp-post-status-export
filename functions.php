@@ -1,6 +1,6 @@
 <?php
 
-if ( !function_exists( 'parse_stats' ) ) {
+if ( !function_exists( 'intcmp' ) ) {
     /**
      * Integer comparison
      *
