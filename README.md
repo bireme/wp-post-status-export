@@ -30,7 +30,7 @@ http://<domain>/?feed=stats&post_type=post&tax=<taxonomy>&format=xml
 #### XML
 ```
 <stats>
-    <total>111</total>
+    <total>115</total>
     <status>
         <field name="publish">100</field>
         <field name="draft">10</field>
@@ -61,7 +61,7 @@ http://<domain>/?feed=stats&post_type=post&tax=<taxonomy>&format=xml
 #### JSON
 ```
 {
-    total: 111,
+    total: 115,
     status: {
         publish: "100",
         draft: "10",
